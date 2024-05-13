@@ -64,17 +64,17 @@ class Lookup {
     func proceed() -> EventLoopFuture<[PeerInfo]> {
         guard self.began == false else { return self.eventLoop.makeFailedFuture(KadDHT.Errors.alreadyPerformingLookup) }
     
-        if self.seeds.contains(where: { peer in
-            peer.peer.b58String == self.target.b58String
-        }) {
-            
-            return self.eventLoop.submit {
-                
-                self.seeds.filter { peer in
-                    peer.peer == self.target
-                }
-            }
-        }
+//        if self.seeds.contains(where: { peer in
+//            peer.peer.b58String == self.target.b58String
+//        }) {
+//            
+//            return self.eventLoop.submit {
+//                
+//                self.seeds.filter { peer in
+//                    peer.peer == self.target
+//                }
+//            }
+//        }
             
         
         self.began = true
