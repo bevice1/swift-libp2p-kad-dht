@@ -23,6 +23,7 @@ class Lookup {
 
     private let completionPromise: EventLoopPromise<Void>
     private let sharedELG: Bool
+    private var seeds: [PeerInfo] = []
 
     enum Errors: Error {
         case canceled
@@ -46,6 +47,7 @@ class Lookup {
         self.logger = Logger(label: "Lookup[\(UUID().uuidString.prefix(5))]")
         self.logger.logLevel = self.host.logger.logLevel
         self.completionPromise = self.eventLoop.makePromise(of: Void.self)
+        self.seeds = seeds
     }
 
     deinit { print("Lookup::deinit") }
@@ -61,6 +63,20 @@ class Lookup {
     /// Spawns ⍺ eventLoops and begins a recursive node query on each one until all contacts in our LookupList have been processed...
     func proceed() -> EventLoopFuture<[PeerInfo]> {
         guard self.began == false else { return self.eventLoop.makeFailedFuture(KadDHT.Errors.alreadyPerformingLookup) }
+    
+        if self.seeds.contains(where: { peer in
+            peer.peer == self.target
+        }) {
+            
+            return self.eventLoop.submit {
+                
+                self.seeds.filter { peer in
+                    peer.peer == self.target
+                }
+            }
+        }
+            
+        
         self.began = true
         self.completionPromise.completeWith(
             (0..<self.maxConcurrentRequests).compactMap { _ -> EventLoopFuture<Void> in
